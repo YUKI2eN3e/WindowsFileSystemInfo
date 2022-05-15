@@ -2,8 +2,8 @@
 import subprocess
 from sys import argv, stderr
 
+# FileInfo stores the file name, owner, and if it a folder 
 class FileInfo:
-	
 	def __init__(self, name, owner, isDir=None):
 		self.name = name
 		self.owner = owner
@@ -15,6 +15,7 @@ class FileInfo:
 	def isADir(self):
 		return self.isDir
 
+# Returns a list of FileInfo objects for the files/folders in the dir
 def get_owners_of_files_in_dir(dir):
 	sp = subprocess.run(["dir", "/og", "/on", "/q", dir], capture_output=True, shell=True)
 	full = str(sp.stdout).split("Directory of")[-1].split("\\r\\n")
@@ -24,7 +25,6 @@ def get_owners_of_files_in_dir(dir):
 	for line in full:
 		info = line.replace("NT ","NT_").split()
 		if len(info) < 6:
-			#print("ERROR: Not enough info in:\n\t{{{}}}".format(line), file=stderr)
 			continue
 		try:
 			if info[-1].strip() != "." and info[-1].strip() != "..":
@@ -39,6 +39,7 @@ def get_owners_of_files_in_dir(dir):
 			continue
 	return files
 
+# Print the list made by get_owners_of_files_in_dir()
 def displayFiles(files):
 	mWidth = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
 	print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
@@ -54,14 +55,11 @@ def displayFiles(files):
 			print("{}{}{}".format(owner, "".ljust(mWidth), f.getName()))
 
 if __name__ == "__main__":
-	#print(argv)
 	if len(argv) > 1:
 		dir = argv[1]
 		if dir == '.' or dir == ".\\":
 			dir = argv[0].replace(argv[0].split('\\')[-1],'')
 		files = get_owners_of_files_in_dir(dir)
 		displayFiles(files)
-		
 	else:
-		#files = get_owners_of_files_in_dir(argv[0].replace(argv[0].split('\\')[-1],''))
 		displayFiles(get_owners_of_files_in_dir("."))
