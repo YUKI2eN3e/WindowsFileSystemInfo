@@ -23,17 +23,19 @@ def get_owners_of_files_in_dir(dir):
 		full.pop(i)
 	files = []
 	for line in full:
-		info = line.replace("NT ","NT_").split()
+		info = line.replace("NT ","NT_").replace("\\TrustedInsta", "\\TrustedInsta ").split()
 		if len(info) < 6:
 			continue
 		try:
 			if info[-1].strip() != "." and info[-1].strip() != "..":
 				owner = info[4].split('\\')[-1]
-				name = info[5]
+				name = ""
+				for i in range(5,len(info)):
+					name = name + ' ' + info[i]
 				if info[3] == "<DIR>":
-					files.append(FileInfo(name,owner,isDir=True))
+					files.append(FileInfo(name.strip(), owner, isDir=True))
 				else:
-					files.append(FileInfo(name,owner))
+					files.append(FileInfo(name.strip(), owner))
 		except IndexError:
 			print("ERROR: Not enough info in:\n\t{{{}}}".format(info), file=stderr)
 			continue
@@ -41,28 +43,34 @@ def get_owners_of_files_in_dir(dir):
 
 # Print the list made by get_owners_of_files_in_dir()
 def displayFiles(files):
-	mWidth = 0
-	if max(len(f.getOwner()) for f in files) != sum(len(f.getOwner()) for f in files)/len(files):
-		mWidth = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
-		print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
-		for i in range(mWidth+1):
-			print("---", end='')
-			if i == mWidth:
-				print('')
-	else:
-		mWidth = max(len(f.getOwner()) for f in files)+2
-		width = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
-		print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
-		for i in range(width + mWidth +9):
-			print("-", end='')
-			if i == width + mWidth +8:
-				print('')
-	for f in files:
-		owner = f.getOwner().ljust(mWidth)
-		if f.isADir():
-			print("{}{}[{}]".format(owner, "".ljust(mWidth), f.getName()))
+	if len(files) > 0:
+		import os
+		mWidth = 0
+		if max(len(f.getOwner()) for f in files) != sum(len(f.getOwner()) for f in files)/len(files) and \
+			min([max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)]), (os.get_terminal_size().columns)/2]) != \
+				max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)]):
+			mWidth = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
+			print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
+			for i in range(mWidth+1):
+				print("---", end='')
+				if i == mWidth:
+					print('')
 		else:
-			print("{}{}{}".format(owner, "".ljust(mWidth), f.getName()))
+			mWidth = max(len(f.getOwner()) for f in files)+2
+			width = min([max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)]), (os.get_terminal_size().columns)/2])
+			print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
+			for i in range(width + mWidth +9):
+				print("-", end='')
+				if i == width + mWidth +8:
+					print('')
+		for f in files:
+			owner = f.getOwner().ljust(mWidth)
+			if f.isADir():
+				print("{}{}[{}]".format(owner, "".ljust(mWidth), f.getName()))
+			else:
+				print("{}{}{}".format(owner, "".ljust(mWidth), f.getName()))
+	else:
+		print("There are no files/folders at this location.")
 
 if __name__ == "__main__":
 	if len(argv) > 1:
