@@ -41,12 +41,22 @@ def get_owners_of_files_in_dir(dir):
 
 # Print the list made by get_owners_of_files_in_dir()
 def displayFiles(files):
-	mWidth = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
-	print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
-	for i in range(mWidth+1):
-		print("---", end='')
-		if i == mWidth:
-			print('')
+	mWidth = 0
+	if max(len(f.getOwner()) for f in files) != sum(len(f.getOwner()) for f in files)/len(files):
+		mWidth = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
+		print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
+		for i in range(mWidth+1):
+			print("---", end='')
+			if i == mWidth:
+				print('')
+	else:
+		mWidth = max(len(f.getOwner()) for f in files)+2
+		width = max([max(len(f.getOwner()) for f in files), max(len(f.getName()) for f in files)])
+		print("{}{}{}".format("Owner".ljust(mWidth),"".ljust(mWidth), "File/Folder"))
+		for i in range(width + mWidth +9):
+			print("-", end='')
+			if i == width + mWidth +8:
+				print('')
 	for f in files:
 		owner = f.getOwner().ljust(mWidth)
 		if f.isADir():
@@ -57,8 +67,8 @@ def displayFiles(files):
 if __name__ == "__main__":
 	if len(argv) > 1:
 		dir = argv[1]
-		if dir == '.' or dir == ".\\":
-			dir = argv[0].replace(argv[0].split('\\')[-1],'')
+		if dir == './' or dir == "../":
+			dir = argv[1].replace('/','')
 		files = get_owners_of_files_in_dir(dir)
 		displayFiles(files)
 	else:
