@@ -1,0 +1,2 @@
+# A quick and dirty way to get the owner of files on windows
+If you want the "correct" way to get file owner information I'd suggest looking into something like a ctypes wrapper for the Windows API, but if you don't care about that then this does the job well enough. 
