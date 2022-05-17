@@ -1,4 +1,3 @@
-#! python3.9 
 import subprocess
 from sys import argv, stderr
 
